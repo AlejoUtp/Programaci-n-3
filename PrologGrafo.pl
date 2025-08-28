@@ -1,6 +1,3 @@
-# Programaci-n-3
-Talleres y Entregas Programacion 3
-
 % Hechos (conexiones con costo)
 conexion(s, v1, 16).
 conexion(s, v2, 13).
