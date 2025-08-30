@@ -102,22 +102,15 @@ prima_de(X, Y) :-              % X es prima de Y si:
 % Punto 2: Relaciones internacionales
 
 % Hechos
-es_estadounidense(west).       % West es estadounidense
-es_nacion(corea_sur).          % Corea del Sur es una nación
-es_enemigo(corea_sur, eeuu).   % Corea del Sur es enemiga de EE.UU.
-es_misil(m1).                  % m1 es un misil
-pertenece(m1, corea_sur).      % Corea del Sur tiene el misil m1
-vendio(west, m1, corea_sur).   % West le vendió el misil a Corea del Sur
+estadounidense(west).
+vendio_a(west, m1, corea).
+es_arma(m1).
+es_hostil(corea).
 
-% Reglas
-es_arma(X) :- es_misil(X).     % Un objeto es un arma si es un misil
-es_hostil(X) :-                % Una nación es hostil si:
-    es_enemigo(X, eeuu),       % Es enemiga de EE.UU.
-    es_nacion(X).              % Y es una nación
-
-es_criminal(X) :-              % Una persona es criminal si:
-    es_estadounidense(X),      % Es estadounidense
-    vendio(X, Arma, Nacion),   % Vendió un arma a una nación
-    es_arma(Arma),             % El objeto vendido es un arma
-    es_hostil(Nacion).         % La nación
+% Ley: es un crimen para un estadounidense vender armas a naciones hostiles.
+es_criminal(Persona) :-
+    estadounidense(Persona),
+    vendio_a(Persona, Arma, Nacion),
+    es_arma(Arma),
+    es_hostil(Nacion).
 
