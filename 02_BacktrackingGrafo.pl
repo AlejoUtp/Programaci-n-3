@@ -28,9 +28,14 @@ costo_por(X, Y, Z, CT) :- conexion(X, Y, C1), conexion(Y, Z, C2),  CT is C1 + C2
 
 %Con qué nodos está conectado Regina y cual es el costo de cada conexión?
 %Llamada en terminal : conexion(v4,Destino,Costo).
+%Costo = 4,
+%Destino = t
+%Costo = 7,
+%Destino = v3
 
 
 % Regla:  ¿Posible Viajar de X a Z?
 viajar_por(X, Y, Z) :- conexion(X,Y,_), conexion(Y,Z,_).
 %Es posible viajar desde Edmonton a Calgary?
-%Llamada en Terminal : viajar_por(v1,D,v2). Devuelve : D=v3   Es posible
+%Llamada en Terminal : viajar_por(v1,D,v2). 
+%Devuelve : D=v3   Es posible
