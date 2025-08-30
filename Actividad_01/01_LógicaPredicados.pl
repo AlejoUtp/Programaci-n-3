@@ -67,7 +67,7 @@ tio_de(X, Y) :-                % X es tío de Y si:
     X \= Y,                    % X y Y son diferentes
     es_hombre(X),              % X es hombre
     ((madre_de(M, Y), hermano_de(X, M)) ; % Hermano de la madre de Y
-    (padre_de(P, Y), hermano_de(X, P) ; hermana_de(X, P))). % Hermano o hermana del padre de Y
+    (padre_de(P, Y), (hermano_de(X, P) ; hermana_de(X, P)))). % Hermano o hermana del padre de Y
 
 tia_de(X, Y) :-                % X es tía de Y si:
     X \= Y,                    % X y Y son diferentes
