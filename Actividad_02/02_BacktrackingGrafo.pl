@@ -39,3 +39,20 @@ viajar_por(X, Y, Z) :- conexion(X,Y,_), conexion(Y,Z,_).
 %Es posible viajar desde Edmonton a Calgary?
 %Llamada en Terminal : viajar_por(v1,D,v2). 
 %Devuelve : D=v3   Es posible
+
+
+% --- Regla principal: se puede viajar de X a Y? ---
+
+% Caso base: existe una conexión directa
+viajar(X, Y, _) :-
+    conexion(X, Y, _).
+
+% Caso recursivo con límite
+viajar(X, Y, N) :-
+    N > 0,
+    conexion(X, Z, _),
+    N1 is N - 1,
+    viajar(Z, Y, N1).
+
+% Predicado principal: por defecto limita a 10 pasos para que con por ejemplo viajar(v2,s). devuelva false y no se quede en bucle 
+viajar(X, Y) :- viajar(X, Y, 10).
