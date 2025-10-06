@@ -1,6 +1,4 @@
 %Integrantes:
-%Juan Esteban Albornoz Gil
-%Karen Alejandra Jaramillo López
 %Kevin Alejandro Londoño Murillo
 
 % Punto 1: Relaciones familiares
