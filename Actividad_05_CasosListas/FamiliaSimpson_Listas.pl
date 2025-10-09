@@ -15,6 +15,12 @@ persona(mona, mujer, [homero]).
 persona(jacqueline, mujer, [patty, selma, marge]).
 persona(marge, mujer, [bart, lisa, maggie]).
 persona(selma, mujer, [ling]).
+persona(bart,hombre,[]).
+persona(lisa,mujer,[]).
+persona(maggie,mujer,[]).
+persona(ling,mujer,[]).
+persona(patty,mujer,[]).
+persona(herbert,hombre,[]). 
 
 % Reglas: Relaciones familiares derivadas
 
@@ -32,50 +38,57 @@ abuela_de(X, Y) :-
 
 %====================================================
 
-hermano_de(X, Y) :-            % X es hermano de Y si:
-     X \= Y,					% X y Y son diferentes, no puedes ser hermano de ti mismo
+hermano_de(X, Y) :-            % X es hermano de Y si:					% X y Y son diferentes, no puedes ser hermano de ti mismo
     persona(X,hombre,_), 		% X es Hombre
-    persona(Z,_,Hijos),			% Z tiene Hijos	
+    persona(_,_,Hijos),			% Z tiene Hijos	
     member(X,Hijos),			% X hace parte de esos Hijos
-    member(Y,Hijos).			% y Y hace parte tambien de esos Hijos, osea tienen en mismo padre o madre y son hermanos X y Y.
+    member(Y,Hijos),			% y Y hace parte tambien de esos Hijos, osea tienen en mismo padre o madre y son hermanos X y Y.
+	     X \= Y.
 
-hermana_de(X, Y) :-           
-    X \= Y,					
+
+hermana_de(X, Y) :-           			
     persona(X,mujer,_), 		
-    persona(Z,_,Hijos),				
+    persona(_,_,Hijos),				
     member(X,Hijos),			
-    member(Y,Hijos).			
+    member(Y,Hijos),
+    X \= Y.
+
+hermanos(X,Y) :-
+    persona(_,_,Hijos),				
+    member(X,Hijos),			
+    member(Y,Hijos),
+    X \= Y.
 
 %====================================================
 
-tio_de(X, Y) :-                % X es tío de Y si:
-    X \= Y,                    % X y Y son diferentes
+tio_de(X, Y) :-                % X es tío de Y si:    						  % X y Y son diferentes
     persona(X,hombre,_),		% si X es hombre
     persona(Z,_,Hijos),			% Z tiene Hijos
     member(Y,Hijos),			% Y hace parte de los Hijos de Z	
-    hermano_de(X,Z).			% X y Z son hermanos, Osea que X es tio del hijo de su hermano, osea Y
-    
+    hermano_de(X,Z),			% X y Z son hermanos, Osea que X es tio del hijo de su hermano, osea Y
+        X \= Y.
 
-tia_de(X, Y) :-               
-    X \= Y,                    
+tia_de(X, Y) :-                                 
     persona(X,mujer,_),
-    persona(Z,_,Hijos),
-    member(Y,Hijos),
-    hermano_de(X,Z).
+    persona(Z, _, Hijos),
+    member(Y, Hijos),
+    hermana_de(X, Z),
+    X \= Y.
 
 %====================================================
 
 hijo_de(X, Y) :-               % X es hijo de Y si:
-    X \= Y,                    % X y Y son diferentes
     persona(X,hombre,_),		%X es hombre
     persona(Y,_,Hijos),			% Y tiene Hijos
-    member(X,Hijos).			% X hace parte de los Hijos de Y, Osea Y padre o madre de X
+    member(X,Hijos),			% X hace parte de los Hijos de Y, Osea Y padre o madre de X
+   X \= Y.						 % X y Y son diferentes
 
 hija_de(X, Y) :-               
-    X \= Y,
+
     persona(X,mujer,_),
     persona(Y,_,Hijos),
-    member(X,Hijos).
+    member(X,Hijos),
+   X \= Y.
 
 %====================================================
 
@@ -83,20 +96,23 @@ hija_de(X, Y) :-
 % Y asi no tenemos problemas de reversibilidad quee sucederia si usaramos tio_de u otras formas de hacerlo.
 
 primo_de(X, Y) :-
-    X \= Y,
     persona(ProgenitorX, _, HijosX), %ProgenitorX Tiene Hijos
     member(X, HijosX), 					% X hace parte de esos Hijos
     persona(ProgenitorY, _, HijosY),	%ProgenitorY Tiene Hijos
     member(Y, HijosY),					% Y hace parte de esos Hijos
-    hermano_de(ProgenitorX, ProgenitorY), %ProgenitorX y ProgenitorY son Hermanos, osea que X y Y son primos.
-    persona(X, hombre, _). %X es hombre.
+    hermanos(ProgenitorX, ProgenitorY), %ProgenitorX y ProgenitorY son Hermanos, osea que X y Y son primos.
+    persona(X, hombre, _), %X es hombre.
+	 X \= Y.
+ 
 
 
 prima_de(X, Y) :-
-    X \= Y,
     persona(ProgenitorX, _, HijosX),
     member(X, HijosX),
     persona(ProgenitorY, _, HijosY),
     member(Y, HijosY),
-    hermano_de(ProgenitorX, ProgenitorY),
-    persona(X, mujer, _).
+    hermanos(ProgenitorX, ProgenitorY),
+    persona(X, mujer, _),
+   X \= Y.
+
+
