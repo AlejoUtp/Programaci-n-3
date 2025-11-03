@@ -44,10 +44,11 @@ class SudokuCSP:
 
 
 # =======================================
-# Ejemplo de uso
+# Mostrar El dominio de cada casilla
 # =======================================
 if __name__ == "__main__":
     sudoku = SudokuCSP()
     print(sudoku)
     # Mostrar dominio de la celda (0,0)
-    print("Dominio de (0,0):", sudoku.domains[(0, 0)])
+    print("Dominio de (0,0):", sudoku.domains[(0, 0)])  #como el sudoku está vacio cada casilla puede contener cualquier numero del 1 al 9 
+#Luego haremos las verificaciones para un sudoku con valores asignados
