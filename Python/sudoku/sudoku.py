@@ -167,6 +167,7 @@ while(True):
     break
 
 print(var_doms)
+mostrar_tablero(var_doms)
 
 print("✅ Proceso terminado. Estado final del Sudoku:")
 
