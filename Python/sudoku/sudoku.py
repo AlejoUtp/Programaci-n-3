@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-"""Versión mejorada del modelo Sudoku en Python"""
-
 import itertools as it
 
 # ---------------------------
@@ -61,23 +58,6 @@ def AllDif(var_doms, vars):
                     anyChange = True
     return anyChange
 
-
-def ExcValue(var_doms, vars):
-    anyChange = False
-    for var in vars:
-        if len(var_doms[var]) > 1:
-            A = var_doms[var]
-            U = set()
-            for var2 in vars:
-                if var != var2:
-                    U = U.union(var_doms[var2])
-            Ex = A - U
-            if len(Ex) == 1:
-                var_doms[var] = Ex
-                anyChange = True
-    return anyChange
-
-
 def HiddenSingle(var_doms, vars):
     """Si un número solo aparece en una celda del grupo, se asigna."""
     anyChange = False
@@ -108,23 +88,119 @@ def NakedPairs(var_doms, vars):
                             anyChange = True
     return anyChange
 
+def PointingPairs(doms, box):
+    """
+    doms: dict de dominios (valores int)
+    box: lista de 9 celdas de la caja (ej. ["A1","A2",...])
+    Devuelve True si modificó algún dominio, False si no.
+    """
+    anyChange = False
+
+    for n in range(1, 10):  # n es entero
+        posiciones = [v for v in box if n in doms[v]]
+        if len(posiciones) < 2:
+            continue
+
+        filas = {v[1:] for v in posiciones}  # '1'..'9'
+        columnas = {v[0] for v in posiciones}
+
+        # todas en la misma fila dentro de la caja
+        if len(filas) == 1:
+            fila = next(iter(filas))
+            for c in "ABCDEFGHI":
+                celda = f"{c}{fila}"
+                if celda not in box and n in doms[celda]:
+                    doms[celda].discard(n)   # discard es más seguro que remove
+                    anyChange = True
+
+        # todas en la misma columna dentro de la caja
+        if len(columnas) == 1:
+            col = next(iter(columnas))
+            for r in map(str, range(1, 10)):
+                celda = f"{col}{r}"
+                if celda not in box and n in doms[celda]:
+                    doms[celda].discard(n)
+                    anyChange = True
+
+    return anyChange
+
+# ---------------------------
+# Comenzamos con el Backtracking
+# ---------------------------
+
+def esta_completo(var_doms):
+    return all(len(var_doms[v]) == 1 for v in var_doms)
+
+def elegir_variable(var_doms):
+    sin_asignar = [v for v in var_doms if len(var_doms[v]) > 1]
+    return min(sin_asignar, key=lambda v: len(var_doms[v]), default=None)
+
+def hay_conflicto(var_doms):
+    return any(len(var_doms[v]) == 0 for v in var_doms)
+
+def copiar_estado(var_doms):
+    return {k: set(v) for k, v in var_doms.items()}
+
+def aplicar_restricciones(var_doms, constraints):
+    cambio = True
+    while cambio:
+        cambio = False
+        for func, group in constraints:
+            if func(var_doms, group):
+                cambio = True
+    return var_doms
+
+def backtracking(var_doms, constraints):
+
+     # Propagar restricciones
+    var_doms = aplicar_restricciones(var_doms, constraints)
+    
+    if esta_completo(var_doms):
+        return var_doms
+    
+    if hay_conflicto(var_doms):
+        return None
+    
+     # Elegir variable por MRV
+    var = elegir_variable(var_doms)
+
+    # Intentar cada valor
+    for valor in list(var_doms[var]):
+        nuevo_estado = copiar_estado(var_doms)
+        nuevo_estado[var] = {valor}
+        resultado = backtracking(nuevo_estado, constraints)
+        if resultado is not None:
+            return resultado
+    
+    # Si ninguno funcionó → backtrack
+    return None
+
+    
+
+
 # ---------------------------
 # DEFINIR GRUPOS Y RESTRICCIONES
 # ---------------------------
 
 rows = range(1, 10)
+
 varsGroups = (
     DefRowsConstraints(cols, rows)
     + DefColsConstraints(cols, rows)
     + DefBoxesConstraints(cols, rows)
 )
 
+
+boxes = DefBoxesConstraints(cols, rows)
+
 constraints = []
 for group in varsGroups:
-    constraints.append(("AllDif", group))
-    constraints.append(("ExcValue", group))
-    constraints.append(("HiddenSingle", group))
-    constraints.append(("NakedPairs", group))
+    constraints.append((AllDif, group))
+    constraints.append((HiddenSingle, group))
+    constraints.append((NakedPairs, group))
+    for group in boxes:
+       constraints.append((PointingPairs, group))
+    
    
 
 
@@ -142,7 +218,7 @@ def mostrar_tablero(var_doms):
                 fila += str(list(val)[0]) + " "
             else:
                 fila += ". "
-            if c in "CF":  # divisiones verticales
+            if c in "CF": 
                 fila += "| "
         print(fila)
         if r in (3, 6):
@@ -154,20 +230,12 @@ def mostrar_tablero(var_doms):
 # PROCESO ITERATIVO
 # ---------------------------
 
-iteration=1
-while(True):
-  anyChange=False
-  for constraint in constraints:
-    anyChangeAux=eval(f"{constraint[0]}(var_doms,{constraint[1]})")
-    anyChange=anyChangeAux if anyChange==False else anyChange
-  print(f"Iteracion {iteration}")
-  iteration+=1
-  #input()
-  if anyChange==False:
-    break
+print("\n🔍 Ejecutando solver completo...\n")
+solucion = backtracking(var_doms, constraints)
 
-print(var_doms)
-mostrar_tablero(var_doms)
-
-print("✅ Proceso terminado. Estado final del Sudoku:")
+if solucion:
+    print("✅ Sudoku resuelto con éxito:")
+    mostrar_tablero(solucion)
+else:
+    print("❌ No tiene solución.")
 

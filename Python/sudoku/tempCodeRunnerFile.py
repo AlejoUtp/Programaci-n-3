@@ -1,1 +1,0 @@
-mostrar_tablero(var_doms)
